@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>ChatGPT Bot</title>
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: linear-gradient(to right, #ece9e6, #ffffff);
+      margin: 0;
+      padding: 0;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      height: 100vh;
+    }
+
+    #chatbox {
+      width: 100%;
+      max-width: 500px;
+      background: #fff;
+      margin-top: 40px;
+      border-radius: 15px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    #chatbox h2 {
+      margin: 0;
+      padding: 20px;
+      background: #007bff;
+      color: white;
+      text-align: center;
+    }
+
+    #chatlog {
+      padding: 20px;
+      height: 400px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .msg {
+      display: flex;
+      max-width: 80%;
+      word-wrap: break-word;
+    }
+
+    .user {
+      align-self: flex-end;
+      justify-content: flex-end;
+    }
+
+    .bot {
+      align-self: flex-start;
+      justify-content: flex-start;
+    }
+
+    .user .bubble {
+      background: #007bff;
+      color: white;
+      border-radius: 15px 15px 0 15px;
+    }
+
+    .bot .bubble {
+      background: #f1f0f0;
+      color: #333;
+      border-radius: 15px 15px 15px 0;
+    }
+
+    .bubble {
+      padding: 10px 15px;
+      font-size: 15px;
+      line-height: 1.4;
+    }
+
+    #inputArea {
+      display: flex;
+      border-top: 1px solid #ddd;
+    }
+
+    #message {
+      flex: 1;
+      padding: 15px;
+      border: none;
+      font-size: 16px;
+      outline: none;
+    }
+
+    button {
+      background: #007bff;
+      color: white;
+      border: none;
+      padding: 0 20px;
+      font-size: 16px;
+      cursor: pointer;
+      transition: background 0.3s ease;
+    }
+
+    button:hover {
+      background: #0056b3;
+    }
+
+    @media (max-width: 600px) {
+      #chatbox {
+        margin: 0;
+        border-radius: 0;
+      }
+
+      #chatlog {
+        height: 60vh;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <div id="chatbox">
+    <h2>ChatGPT Bot</h2>
+    <div id="chatlog"></div>
+    <div id="inputArea">
+      <input type="text" id="message" placeholder="Type a message..." />
+      <button onclick="sendMessage()">Send</button>
+    </div>
+  </div>
+
+  <script>
+    async function sendMessage() {
+      const input = document.getElementById("message");
+      const text = input.value.trim();
+      if (!text) return;
+
+      appendMessage("user", text);
+      input.value = "";
+
+      try {
+        const res = await fetch("/chat", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ message: text })
+        });
+
+        const reply = await res.text();
+        appendMessage("bot", reply);
+      } catch (err) {
+        appendMessage("bot", "⚠️ Failed to connect to server.");
+      }
+    }
+
+    function appendMessage(sender, text) {
+      const chat = document.getElementById("chatlog");
+      const msgDiv = document.createElement("div");
+      msgDiv.className = `msg ${sender}`;
+      msgDiv.innerHTML = `<div class="bubble">${text}</div>`;
+      chat.appendChild(msgDiv);
+      chat.scrollTop = chat.scrollHeight;
+    }
+    document.getElementById("message").addEventListener("keydown", function (e) {
+  if (e.key === "Enter") {
+    sendMessage();
+  }
+});
+  </script>
+
+</body>
+</html>
